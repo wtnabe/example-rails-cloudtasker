@@ -1,0 +1,61 @@
+steps:
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    id: store-app-host
+    entrypoint: bash
+    args:
+      - -c
+      - './bin/apphost > ./config/host'
+  - name: gcr.io/k8s-skaffold/pack
+    id: build
+    entrypoint: pack
+    args:
+      - build
+      - app
+      - -B
+      - heroku/builder:22
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    id: push
+    entrypoint: bash
+    args:
+      - -c
+      - 'docker tag app asia-docker.pkg.dev/${PROJECT_ID}/web-as-background/rails-app && docker push asia-docker.pkg.dev/${PROJECT_ID}/web-as-background/rails-app'
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    id: migrate
+    entrypoint: gcloud
+    args:
+      - beta
+      - run
+      - jobs
+      - deploy
+      - web-as-background-migrate
+      - --command
+      - migrate
+      - --image
+      - asia-docker.pkg.dev/${PROJECT_ID}/web-as-background/rails-app
+      - --region
+      - asia-northeast1
+      - --add-volume
+      - name=storage,type=cloud-storage,bucket=${PROJECT_ID}-web-as-background
+      - --add-volume-mount
+      - volume=storage,mount-path=/workspace/storage
+      - --execute-now
+      - --wait
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    id: deploy
+    entrypoint: gcloud
+    args:
+      - beta
+      - run
+      - deploy
+      - web-as-background
+      - --allow-unauthenticated
+      - --set-env-vars
+      - PROJECT_ID=${PROJECT_ID}
+      - --image
+      - asia-docker.pkg.dev/${PROJECT_ID}/web-as-background/rails-app
+      - --region
+      - asia-northeast1
+      - --add-volume
+      - name=storage,type=cloud-storage,bucket=${PROJECT_ID}-web-as-background
+      - --add-volume-mount
+      - volume=storage,mount-path=/workspace/storage

@@ -1,0 +1,12 @@
+steps:
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: gcloud
+    args:
+      - artifacts
+      - repositories
+      - create
+      - web-as-background
+      - --repository-format
+      - docker
+      - --location
+      - asia

@@ -1,0 +1,8 @@
+#! /bin/sh
+
+SERVICE="web-as-background"
+
+gcloud run services list | awk -v service=${SERVICE} '
+  $2 == service { found = 1; printf("%s", $4) }
+  END { if (!found) exit 1 }
+'

@@ -1,0 +1,10 @@
+steps:
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: gcloud
+    args:
+      - tasks
+      - queues
+      - create
+      - activejob-queue
+      - --location
+      - asia-northeast1

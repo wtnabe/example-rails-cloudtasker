@@ -1,0 +1,12 @@
+steps:
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: gsutil
+    args:
+      - mb
+      - -l
+      - asia-northeast1
+      - -c
+      - regional
+      - -b
+      - 'on'
+      - 'gs://${PROJECT_ID}-web-as-background'
